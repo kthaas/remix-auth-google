@@ -1,5 +1,5 @@
 import type { StrategyVerifyCallback } from 'remix-auth';
-import type { OAuth2Profile, OAuth2StrategyVerifyParams } from 'remix-auth-oauth2';
+import type { OAuth2Profile, OAuth2StrategyVerifyParams, TokenResponseBody } from 'remix-auth-oauth2';
 import { OAuth2Strategy } from 'remix-auth-oauth2';
 /**
  * @see https://developers.google.com/identity/protocols/oauth2/scopes
@@ -12,7 +12,7 @@ export type GoogleStrategyOptions = {
     /**
      * @default "openid profile email"
      */
-    scope?: GoogleScope[] | string;
+    scope?: GoogleScope[];
     accessType?: 'online' | 'offline';
     includeGrantedScopes?: boolean;
     prompt?: 'none' | 'consent' | 'select_account';
@@ -51,7 +51,7 @@ export type GoogleExtraParams = {
     id_token: string;
 } & Record<string, string | number>;
 export declare const GoogleStrategyScopeSeperator = " ";
-export declare const GoogleStrategyDefaultScopes: string;
+export declare const GoogleStrategyDefaultScopes: string[];
 export declare const GoogleStrategyDefaultName = "google";
 export declare class GoogleStrategy<User> extends OAuth2Strategy<User, GoogleProfile, GoogleExtraParams> {
     name: string;
@@ -63,6 +63,6 @@ export declare class GoogleStrategy<User> extends OAuth2Strategy<User, GooglePro
     private readonly userInfoURL;
     constructor({ clientID, clientSecret, callbackURL, scope, accessType, includeGrantedScopes, prompt, hd, loginHint, }: GoogleStrategyOptions, verify: StrategyVerifyCallback<User, OAuth2StrategyVerifyParams<GoogleProfile, GoogleExtraParams>>);
     protected authorizationParams(): URLSearchParams;
-    protected userProfile(accessToken: string): Promise<GoogleProfile>;
-    private parseScope;
+    protected userProfile(tokens: TokenResponseBody): Promise<GoogleProfile>;
+    private static parseScope;
 }

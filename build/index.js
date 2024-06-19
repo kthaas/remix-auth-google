@@ -1,28 +1,30 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.GoogleStrategy = exports.GoogleStrategyDefaultName = exports.GoogleStrategyDefaultScopes = exports.GoogleStrategyScopeSeperator = void 0;
-const remix_auth_oauth2_1 = require("remix-auth-oauth2");
-exports.GoogleStrategyScopeSeperator = ' ';
-exports.GoogleStrategyDefaultScopes = [
+import { OAuth2Strategy } from 'remix-auth-oauth2';
+export const GoogleStrategyScopeSeperator = ' ';
+export const GoogleStrategyDefaultScopes = [
     'openid',
     'https://www.googleapis.com/auth/userinfo.profile',
     'https://www.googleapis.com/auth/userinfo.email',
-].join(exports.GoogleStrategyScopeSeperator);
-exports.GoogleStrategyDefaultName = 'google';
-class GoogleStrategy extends remix_auth_oauth2_1.OAuth2Strategy {
+];
+export const GoogleStrategyDefaultName = 'google';
+export class GoogleStrategy extends OAuth2Strategy {
+    name = GoogleStrategyDefaultName;
+    accessType;
+    prompt;
+    includeGrantedScopes;
+    hd;
+    loginHint;
+    userInfoURL = 'https://www.googleapis.com/oauth2/v3/userinfo';
     constructor({ clientID, clientSecret, callbackURL, scope, accessType, includeGrantedScopes, prompt, hd, loginHint, }, verify) {
         super({
-            clientID,
+            clientId: clientID,
             clientSecret,
-            callbackURL,
-            authorizationURL: 'https://accounts.google.com/o/oauth2/v2/auth',
-            tokenURL: 'https://oauth2.googleapis.com/token',
+            redirectURI: callbackURL,
+            authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+            tokenEndpoint: 'https://oauth2.googleapis.com/token',
+            scopes: GoogleStrategy.parseScope(scope),
         }, verify);
-        this.name = exports.GoogleStrategyDefaultName;
-        this.userInfoURL = 'https://www.googleapis.com/oauth2/v3/userinfo';
-        this.scope = this.parseScope(scope);
-        this.accessType = accessType !== null && accessType !== void 0 ? accessType : 'online';
-        this.includeGrantedScopes = includeGrantedScopes !== null && includeGrantedScopes !== void 0 ? includeGrantedScopes : false;
+        this.accessType = accessType ?? 'online';
+        this.includeGrantedScopes = includeGrantedScopes ?? false;
         this.prompt = prompt;
         this.hd = hd;
         this.loginHint = loginHint;
@@ -43,10 +45,10 @@ class GoogleStrategy extends remix_auth_oauth2_1.OAuth2Strategy {
         }
         return params;
     }
-    async userProfile(accessToken) {
+    async userProfile(tokens) {
         const response = await fetch(this.userInfoURL, {
             headers: {
-                Authorization: `Bearer ${accessToken}`,
+                Authorization: `Bearer ${tokens.access_token}`,
             },
         });
         const raw = await response.json();
@@ -65,14 +67,13 @@ class GoogleStrategy extends remix_auth_oauth2_1.OAuth2Strategy {
         return profile;
     }
     // Allow users the option to pass a scope string, or typed array
-    parseScope(scope) {
+    static parseScope(scope) {
         if (!scope) {
-            return exports.GoogleStrategyDefaultScopes;
+            return GoogleStrategyDefaultScopes;
         }
         else if (Array.isArray(scope)) {
-            return scope.join(exports.GoogleStrategyScopeSeperator);
+            return scope;
         }
         return scope;
     }
 }
-exports.GoogleStrategy = GoogleStrategy;

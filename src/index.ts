@@ -2,6 +2,7 @@ import type { StrategyVerifyCallback } from 'remix-auth'
 import type {
   OAuth2Profile,
   OAuth2StrategyVerifyParams,
+  TokenResponseBody,
 } from 'remix-auth-oauth2'
 import { OAuth2Strategy } from 'remix-auth-oauth2'
 
@@ -17,7 +18,7 @@ export type GoogleStrategyOptions = {
   /**
    * @default "openid profile email"
    */
-  scope?: GoogleScope[] | string
+  scope?: GoogleScope[]
   accessType?: 'online' | 'offline'
   includeGrantedScopes?: boolean
   prompt?: 'none' | 'consent' | 'select_account'
@@ -59,7 +60,7 @@ export const GoogleStrategyDefaultScopes = [
   'openid',
   'https://www.googleapis.com/auth/userinfo.profile',
   'https://www.googleapis.com/auth/userinfo.email',
-].join(GoogleStrategyScopeSeperator)
+]
 export const GoogleStrategyDefaultName = 'google'
 
 export class GoogleStrategy<User> extends OAuth2Strategy<
@@ -100,15 +101,15 @@ export class GoogleStrategy<User> extends OAuth2Strategy<
   ) {
     super(
       {
-        clientID,
+        clientId: clientID,
         clientSecret,
-        callbackURL,
-        authorizationURL: 'https://accounts.google.com/o/oauth2/v2/auth',
-        tokenURL: 'https://oauth2.googleapis.com/token',
+        redirectURI: callbackURL,
+        authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+        tokenEndpoint: 'https://oauth2.googleapis.com/token',
+        scopes: GoogleStrategy.parseScope(scope),
       },
       verify
     )
-    this.scope = this.parseScope(scope)
     this.accessType = accessType ?? 'online'
     this.includeGrantedScopes = includeGrantedScopes ?? false
     this.prompt = prompt
@@ -133,10 +134,12 @@ export class GoogleStrategy<User> extends OAuth2Strategy<
     return params
   }
 
-  protected async userProfile(accessToken: string): Promise<GoogleProfile> {
+  protected async userProfile(
+    tokens: TokenResponseBody
+  ): Promise<GoogleProfile> {
     const response = await fetch(this.userInfoURL, {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${tokens.access_token}`,
       },
     })
     const raw: GoogleProfile['_json'] = await response.json()
@@ -156,11 +159,11 @@ export class GoogleStrategy<User> extends OAuth2Strategy<
   }
 
   // Allow users the option to pass a scope string, or typed array
-  private parseScope(scope: GoogleStrategyOptions['scope']) {
+  private static parseScope(scope: GoogleStrategyOptions['scope']) {
     if (!scope) {
       return GoogleStrategyDefaultScopes
     } else if (Array.isArray(scope)) {
-      return scope.join(GoogleStrategyScopeSeperator)
+      return scope
     }
 
     return scope
