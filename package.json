@@ -56,9 +56,5 @@
   },
   "dependencies": {
     "remix-auth-oauth2": "^2.1.0"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": "yarn lint",
-    "*.{js,jsx,ts,tsx,css,json,md}": "yarn format"
   }
 }
