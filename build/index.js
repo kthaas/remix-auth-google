@@ -29,11 +29,9 @@ export class GoogleStrategy extends OAuth2Strategy {
         this.hd = hd;
         this.loginHint = loginHint;
     }
-    authorizationParams() {
-        const params = new URLSearchParams({
-            access_type: this.accessType,
-            include_granted_scopes: String(this.includeGrantedScopes),
-        });
+    authorizationParams(params) {
+        params.set('access_type', this.accessType);
+        params.set('include_granted_scopes', String(this.includeGrantedScopes));
         if (this.prompt) {
             params.set('prompt', this.prompt);
         }

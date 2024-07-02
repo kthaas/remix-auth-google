@@ -62,7 +62,7 @@ export declare class GoogleStrategy<User> extends OAuth2Strategy<User, GooglePro
     private readonly loginHint?;
     private readonly userInfoURL;
     constructor({ clientID, clientSecret, callbackURL, scope, accessType, includeGrantedScopes, prompt, hd, loginHint, }: GoogleStrategyOptions, verify: StrategyVerifyCallback<User, OAuth2StrategyVerifyParams<GoogleProfile, GoogleExtraParams>>);
-    protected authorizationParams(): URLSearchParams;
+    protected authorizationParams(params: URLSearchParams): URLSearchParams;
     protected userProfile(tokens: TokenResponseBody): Promise<GoogleProfile>;
     private static parseScope;
 }
